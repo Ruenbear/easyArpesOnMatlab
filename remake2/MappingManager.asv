@@ -1,0 +1,44 @@
+classdef MappingManager
+    % 调控Mapping的Cut位置
+    % 整体的归一化、去线性本底、二阶微分等
+    % 3D-Cube的生成
+    properties (Access = public)
+        omap
+        map
+        
+        val_arr
+        sum_arr = [1,1,1];
+
+    end
+    methods (Access = public)
+        function obj = MappingManager(map,val)
+            if nargin == 1
+                obj.val_arr = [mean(map.eel),mean(map.xxl),mean(map.yyl)];
+            else
+                obj.val_arr = val; %初始化切片位置
+            end
+            obj.map = map;
+            objnormalize;
+            obj.omap = obj.map;
+        end
+
+        function r = getE(obj)
+            r = obj.map.getE(obj.val_arr(1),obj.sum_arr(1));
+        end
+        function r = getX(obj)
+            r = obj.map.getX(obj.val_arr(2),obj.sum_arr(2));
+        end
+        function r = getY(obj)
+            r = obj.map.getY(obj.val_arr(3),obj.sum_arr(3));
+        end
+
+        function normalize(obj)
+            M = max(max(obj.map.mat3));
+            temp1 = 0.6*mean(M)+0.4*max(M);
+            m = min(min(obj.map.mat3));
+            temp2 = 0.6*mean(m)+0.4*min(m);
+            obj.map.mat3 = (obj.map.mat3-temp2)/(temp1-temp2);     
+        end
+
+    end
+end
